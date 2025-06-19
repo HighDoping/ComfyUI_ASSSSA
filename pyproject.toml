@@ -13,7 +13,6 @@ readme = "README.md"
 license = {text = "MIT license"}
 classifiers = []
 dependencies = [
-
 ]
 
 
@@ -34,9 +33,9 @@ homepage = "https://github.com/HighDoping/ComfyUI_ASSSSA"
 
 
 [tool.comfy]
-PublisherId = "HighDoping"
+PublisherId = "highdoping"
 DisplayName = "ComfyUI-ASSSSA"
-Icon = ""
+Icon = "🎬"
 
 
 [tool.setuptools.package-data]
