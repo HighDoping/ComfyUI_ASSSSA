@@ -28,9 +28,9 @@ dev = [
 ]
 
 [project.urls]
+Repository = "https://github.com/HighDoping/ComfyUI_ASSSSA"
+#  Used by Comfy Registry https://registry.comfy.org
 bugs = "https://github.com/HighDoping/ComfyUI_ASSSSA/issues"
-homepage = "https://github.com/HighDoping/ComfyUI_ASSSSA"
-
 
 [tool.comfy]
 PublisherId = "highdoping"
