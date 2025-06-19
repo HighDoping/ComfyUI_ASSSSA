@@ -279,7 +279,8 @@ class VideoTranscodingNode:
             cmd.append(output_path)
 
             # Run the command
-            logging.info(f"Running command: {" ".join(cmd)}")
+            full_cmd = " ".join(cmd)
+            logging.info(f"Running command: {full_cmd}")
             process = subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
@@ -381,7 +382,8 @@ class SubtitleExtractionNode:
         ]
         try:
             # Run the command
-            logging.info(f"Running command: {" ".join(cmd)}")
+            full_cmd = " ".join(cmd)
+            logging.info(f"Running command: {full_cmd}")
             process = subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
@@ -549,7 +551,8 @@ class SubtitleEmbeddingNode:
 
         try:
             # Run the command
-            logging.info(f"Running command: {" ".join(cmd)}")
+            full_cmd = " ".join(cmd)
+            logging.info(f"Running command: {full_cmd}")
             process = subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
             )
