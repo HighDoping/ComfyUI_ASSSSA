@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ComfyUI_ASSSSA"
-version = "0.0.1"
+version = "0.0.2"
 description = "Add ASS/SSA subtitle to video using ffmpeg."
 authors = [
   {name = "HighDoping", email = "highdoping@gmail.com"}
