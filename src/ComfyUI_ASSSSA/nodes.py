@@ -204,7 +204,7 @@ class VideoTranscodingNode:
                     "STRING",
                     {
                         "multiline": False,
-                        "default": "Transcoded",
+                        "default": "video/transcoded",
                         "tooltip": "Prefix for the output video file",
                     },
                 ),
@@ -239,15 +239,13 @@ class VideoTranscodingNode:
             return (output_path,)
 
         try:
-            # Build the ffmpeg command based on settings
             cmd = [
                 "ffmpeg",
-                "-y",  # Overwrite output file if it exists
+                "-y",
                 "-i",
                 video_path,
             ]
 
-            # Add video codec and parameters
             if settings["codec"] != "copy":
                 cmd += ["-c:v", settings["codec"]]
                 # Only apply these settings when not copying
@@ -260,10 +258,8 @@ class VideoTranscodingNode:
                 if settings["crf"]:
                     cmd += ["-crf", str(settings["crf"])]
             else:
-                # When copying, just set the codec
                 cmd += ["-c:v", "copy"]
 
-            # Add audio codec and bitrate
             if settings["audio_codec"] != "copy":
                 cmd += ["-c:a", settings["audio_codec"]]
                 if settings["audio_bitrate"] != "source":
@@ -271,14 +267,11 @@ class VideoTranscodingNode:
             else:
                 cmd += ["-c:a", "copy"]
 
-            # Add additional parameters
             if settings["additional_params"]:
                 cmd += settings["additional_params"].split()
 
-            # Set output file path
             cmd.append(output_path)
 
-            # Run the command
             full_cmd = " ".join(cmd)
             logging.info(f"Running command: {full_cmd}")
             process = subprocess.run(
@@ -297,6 +290,7 @@ class VideoTranscodingNode:
 
 
 class SubtitleExtractionNode:
+
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -326,12 +320,12 @@ class SubtitleExtractionNode:
         video_basename = os.path.splitext(os.path.basename(video_path))[0]
         # Create output path with video name included
         output_path = os.path.join(
-            folder_paths.get_temp_directory(), f"{video_basename}"
+            folder_paths.get_output_directory(), f"{video_basename}"
         )
-        # Check if the video file exists
         if not os.path.exists(video_path):
             logging.error(f"Error: Video file '{video_path}' not found")
             return (output_path,)
+
         check_cmd = [
             "ffprobe",
             "-v",
@@ -353,7 +347,7 @@ class SubtitleExtractionNode:
                 logging.error(f"FFprobe error: {process.stderr}")
                 return (output_path,)
             else:
-                # get indet and codec_name from output
+                # get index and codec_name from output
                 subtitle_streams = []
                 for line in process.stdout.splitlines():
                     if line.startswith("index="):
@@ -369,19 +363,18 @@ class SubtitleExtractionNode:
         except subprocess.CalledProcessError:
             logging.error(f"Error checking subtitle streams: {process.stderr}")
             return (output_path,)
-        # "ffmpeg -i input.mkv -map 0:s:0 subs.ass"
-        # Build the ffmpeg command to extract subtitles
+
         cmd = [
             "ffmpeg",
-            "-y",  # Overwrite output file if it exists
+            "-y",
             "-i",
             video_path,
             "-map",
             f"0:s:{stream}",  # Map the first subtitle stream
-            f"{output_path}",  # Output file path
+            f"{output_path}",
         ]
         try:
-            # Run the command
+
             full_cmd = " ".join(cmd)
             logging.info(f"Running command: {full_cmd}")
             process = subprocess.run(
@@ -399,6 +392,7 @@ class SubtitleExtractionNode:
 
 
 class SubtitleEmbeddingNode:
+
     def __init__(self):
         self.default_settings = {
             "format": "mkv",
@@ -425,7 +419,7 @@ class SubtitleEmbeddingNode:
                     "STRING",
                     {
                         "multiline": False,
-                        "default": "Embedded",
+                        "default": "video/embedded",
                         "tooltip": "Prefix for the output video file",
                     },
                 ),
@@ -444,7 +438,12 @@ class SubtitleEmbeddingNode:
     DESCRIPTION = "Embed subtitles into video"
 
     def embed_subtitles(
-        self, video_path, subtitle_path, filename_prefix, embed_method, settings={}
+        self,
+        video_path: str,
+        subtitle_path: str,
+        filename_prefix: str,
+        embed_method: str,
+        settings={},
     ):
         if settings is None or settings == {}:
             settings = self.default_settings
@@ -461,8 +460,6 @@ class SubtitleEmbeddingNode:
             )
         if not os.path.exists(os.path.dirname(output_path)):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        # Implementation would go here
-        # ffmpeg -i input.mp4 -vf "subtitles=subtitle.ass" -c:a copy output.mp4
         if not os.path.exists(video_path):
             logging.error(f"Error: Video file '{video_path}' not found")
             return (output_path,)
@@ -472,27 +469,25 @@ class SubtitleEmbeddingNode:
         if embed_method not in ["soft", "hard"]:
             logging.error(f"Error: Invalid embed method '{embed_method}'")
             return (output_path,)
+
         # Determine subtitle format based on file extension
         # subtitle_format = os.path.splitext(subtitle_path)[1][1:].lower()
+
         if embed_method == "soft":
-            # Build the ffmpeg command to embed subtitles
             if settings["format"] != "mkv":
                 logging.error("Error: Soft embedding is only supported for MKV format.")
                 return (output_path,)
             cmd = [
                 "ffmpeg",
-                "-y",  # Overwrite output file if it exists
+                "-y",
                 "-i",
                 video_path,
                 "-i",
                 subtitle_path,
-                # f"-c:s {subtitle_format}",
             ]
 
-            # Add video codec and parameters
             if settings["codec"] != "copy":
                 cmd += ["-c:v", settings["codec"]]
-                # Only apply these settings when not copying
                 if settings["resolution"] != "source":
                     cmd += ["-vf", f"scale={settings['resolution']}"]
                 if settings["framerate"] != "source":
@@ -502,10 +497,8 @@ class SubtitleEmbeddingNode:
                 if settings["crf"]:
                     cmd += ["-crf", str(settings["crf"])]
             else:
-                # When copying, just set the codec
                 cmd += ["-c:v", "copy"]
 
-            # Add audio codec and bitrate
             if settings["audio_codec"] != "copy":
                 cmd += ["-c:a", settings["audio_codec"]]
                 if settings["audio_bitrate"] != "source":
@@ -519,16 +512,18 @@ class SubtitleEmbeddingNode:
             cmd.append(output_path)
 
         elif embed_method == "hard":
-            # Build the ffmpeg command to embed subtitles
+            subtitle_path = subtitle_path.replace("\\", "/")
+            subtitle_path = re.sub(r"(?<!\\):", r"\\:", subtitle_path)
+
             cmd = [
                 "ffmpeg",
-                "-y",  # Overwrite output file if it exists
+                "-y",
                 "-i",
                 video_path,
                 "-vf",
-                f"subtitles={subtitle_path}",
+                f"subtitles='{subtitle_path}'",
             ]
-            # Add video codec and parameters
+
             if settings["codec"] != "copy":
                 cmd += ["-c:v", settings["codec"]]
                 if settings["resolution"] != "source":
@@ -540,17 +535,14 @@ class SubtitleEmbeddingNode:
                 if settings["crf"]:
                     cmd += ["-crf", str(settings["crf"])]
 
-            # Add audio codec and bitrate
             if settings["audio_codec"] != "copy":
                 cmd += ["-c:a", settings["audio_codec"]]
                 if settings["audio_bitrate"] != "source":
                     cmd += ["-b:a", settings["audio_bitrate"]]
 
-            # Set output file path
             cmd.append(output_path)
 
         try:
-            # Run the command
             full_cmd = " ".join(cmd)
             logging.info(f"Running command: {full_cmd}")
             process = subprocess.run(
@@ -648,7 +640,6 @@ class ASSSubtitleReaderNode:
                 content = file.read()
 
             # Parse sections
-
             current_section = None
             dialog_lines = []
             styles_info = []
@@ -696,14 +687,10 @@ class ASSSubtitleReaderNode:
             return (f"Error: {str(e)}", "", "")
 
 
-class ASSSubtitleCacheNode:
+class ASSSubtitleSaveNode:
     """
-    Save received string to subtitle file (.ass or .srt) in cache.
+    Save received string to subtitle file (.ass or .srt).
     """
-
-    def __init__(self):
-        self.cache_dir = folder_paths.get_temp_directory()
-        self.prefix_append = ""
 
     @classmethod
     def INPUT_TYPES(s):
@@ -751,12 +738,11 @@ class ASSSubtitleCacheNode:
     def save_subtitle(
         self, subtitle_text, filename_prefix, format="ass", encoding="utf-8"
     ):
-        filename_prefix += self.prefix_append
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"{filename_prefix}_{timestamp}.{format}"
 
         # Create full filepath in cache directory
-        filepath = os.path.join(self.cache_dir, filename)
+        filepath = os.path.join(folder_paths.get_output_directory(), filename)
         if not os.path.exists(os.path.dirname(filepath)):
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
         try:
@@ -807,17 +793,17 @@ NODE_CLASS_MAPPINGS = {
     "SubtitleExtraction": SubtitleExtractionNode,
     "SubtitleEmbedding": SubtitleEmbeddingNode,
     "ASSSubtitleReader": ASSSubtitleReaderNode,
-    "ASSSubtitleCache": ASSSubtitleCacheNode,
+    "ASSSubtitleSave": ASSSubtitleSaveNode,
     "MultilineTextInput": MultilineTextInputNode,
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "FFMpegSettings": "FFmpeg Settings",
-    "VideoTranscoding": "Video Transcoding",
-    "SubtitleExtraction": "Subtitle Extraction",
-    "SubtitleEmbedding": "Subtitle Embedding",
-    "ASSSubtitleReader": "Load ASS Subtitles",
-    "ASSSubtitleCache": "Temporary save subtitle file",
-    "MultilineTextInput": "Multi line Input",
+    "FFMpegSettings": "FFmpeg settings",
+    "VideoTranscoding": "Video transcoding",
+    "SubtitleExtraction": "Subtitle extraction",
+    "SubtitleEmbedding": "Subtitle embedding",
+    "ASSSubtitleReader": "Load ASS subtitles",
+    "ASSSubtitleSave": "Save subtitle file",
+    "MultilineTextInput": "Multiline text input",
 }
