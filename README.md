@@ -18,3 +18,13 @@ Add ASS/SSA subtitle to video using ffmpeg.
 - Extract ASS/SSA subtitle from video.
 - Hard code or soft code subtitle to video.
 - Video transcoding (Not tested).
+
+## Available Nodes
+
+- **FFMpegSettings**: FFmpeg Settings.
+- **VideoTranscoding**: Video Transcoding based on FFmpeg setting.
+- **SubtitleExtraction**: Extract soft encoded subtitle from mkv files.
+- **SubtitleEmbedding**: Embed subtitle to video. Support soft subtitles in MKV, and hard subtitles in various formats.
+- **ASSSubtitleReader**: Load ASS Subtitles from file to ComfyUI strings.
+- **ASSSubtitleSave**: Save ComfyUI strings to subtitle file.
+- **MultilineTextInput**: Multiline text input.
