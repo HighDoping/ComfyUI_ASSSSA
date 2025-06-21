@@ -8,7 +8,7 @@ __all__ = [
 
 __author__ = """HighDoping"""
 __email__ = "highdoping@gmail.com"
-__version__ = "0.0.2"
+__version__ = "0.1.0"
 
 from .src.ComfyUI_ASSSSA.nodes import NODE_CLASS_MAPPINGS
 from .src.ComfyUI_ASSSSA.nodes import NODE_DISPLAY_NAME_MAPPINGS
